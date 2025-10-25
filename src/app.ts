@@ -59,5 +59,5 @@ app.use("/competition", competitionRouter);
 app.use("/notification", notificationRouter);
 app.use("/chat", chatRoute);
 app.use("/mentor", mentorRoute);
-app.use("/notice", noticeRoute);
+app.use("/notic", noticeRoute);
 export default app;
