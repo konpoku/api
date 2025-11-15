@@ -8,6 +8,7 @@ import authenticate, { JwtUserPayload, JwtVerifyPayload } from "../middlewares/a
 import { validateEmail, validatePassword } from "../helpers/validate";
 import { client } from "..";
 import { sendMessageVerifyCode } from "../helpers/short_message";
+import { mutation_update_user_profile } from "../hasura/user";
 
 
 
@@ -451,6 +452,38 @@ router.post("/edit-profile", authenticate(), async(req, res) => {
     console.error(err);
     return res.status(500).send(err);
   };
+});
+
+router.post("/update", authenticate(), async(req, res) => {
+  /**
+   * @route POST /user/update
+   * @description 更新用户资料（除email/phone/password外的其他字段）
+   * @body {className?: string, department?: string, realname?: string, student_no?: string, username?: string}
+   * @returns 更改状态
+   */
+  const updates = req.body; 
+  if (!updates.className && !updates.department && !updates.realname && !updates.student_no && !updates.username) {
+    return res.status(422).send("422 Unprocessable Entity: Missing fields to update");
+  }
+  const className = updates.className;
+  const department = updates.department;
+  const realname = updates.realname;
+  const student_no = updates.student_no;
+  const username = updates.username;
+  if (Object.keys(updates).length === 0) {
+    return res.status(422).send("422 Unprocessable Entity: No fields to update");
+  }
+  try {
+    const result = mutation_update_user_profile(req.auth.user.uuid, className, department, realname, student_no, username);
+    if (result) {
+      return res.status(200).send(result);
+    } else {
+      return res.status(500).send("500 Internal Server Error: Failed to update user profile");
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send(err);
+  }
 });
 
 
